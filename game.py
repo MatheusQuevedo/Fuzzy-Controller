@@ -1,6 +1,6 @@
 import os
 import math
-import numpy as  np
+import numpy as np
 import pygame
 import time
 from math import sin, radians, degrees, copysign
@@ -124,6 +124,7 @@ class Game:
                 car.steering = 0
             car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
 
+            test = abs(car.steering)
             # Logic
             car.update(dt)
 
@@ -141,12 +142,29 @@ class Game:
             if (track_mask.get_at(position)==1):
                 crash()
             #sensor ARRUMAR
-            pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, pygame_position + math.cos(math.radians(90 + car.steering)) * 100])
+
+            x =  pygame_position[0] + math.cos(math.radians(car.angle)) * 100
+            y =  pygame_position[1] - math.sin(math.radians(car.angle)) * 100
+
+            x1 = pygame_position[0] + math.cos(math.radians(car.angle+90)) * 100
+            y1 = pygame_position[1] - math.sin(math.radians(car.angle+90)) * 100
+
+            x2 = pygame_position[0] + math.cos(math.radians(car.angle - 90)) * 100
+            y2 = pygame_position[1] - math.sin(math.radians(car.angle - 90)) * 100
+
+            pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+            pygame.draw.lines(self.screen, (255, 0, 0), True, [pygame_position, [x1, y1]])
+            pygame.draw.lines(self.screen, (255, 0, 0), True, [pygame_position, [x2, y2]])
+
 
             self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
 
             pygame.display.flip()
 
+            print(pygame_position)
+            print(pygame_position + abs(math.cos(math.degrees(abs(car.angle)))) * 100)
+            print("Car steering:", car.steering)
+            print("Car Angle:", car.angle)
 
             self.clock.tick(self.ticks)
         pygame.quit()
