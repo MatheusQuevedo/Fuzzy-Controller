@@ -138,33 +138,60 @@ class Game:
             rect.center
             for i in pygame_position:
                 position.append(np.int(i))
+
             #se for uma posição da máscara, ele colide
             if (track_mask.get_at(position)==1):
                 crash()
-            #sensor ARRUMAR
 
-            x =  pygame_position[0] + math.cos(math.radians(car.angle)) * 100
-            y =  pygame_position[1] - math.sin(math.radians(car.angle)) * 100
+            #sensores
+            for i in range(1500):
+                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle)) * i)
+                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle)) * i)
+                if (track_mask.get_at([x,y])==1):
+                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                    print('Sensor 1: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    break
 
-            x1 = pygame_position[0] + math.cos(math.radians(car.angle+90)) * 100
-            y1 = pygame_position[1] - math.sin(math.radians(car.angle+90)) * 100
+            for i in range(1500):
+                x = np.int(pygame_position[0] + math.cos(math.radians(car.angle+90)) * i)
+                y = np.int(pygame_position[1] - math.sin(math.radians(car.angle+90)) * i)
+                if (track_mask.get_at([x,y])==1):
+                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                    print('Sensor 2: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    break
 
-            x2 = pygame_position[0] + math.cos(math.radians(car.angle - 90)) * 100
-            y2 = pygame_position[1] - math.sin(math.radians(car.angle - 90)) * 100
+            for i in range(1500):
+                x = np.int(pygame_position[0] + math.cos(math.radians(car.angle - 90)) * i)
+                y = np.int(pygame_position[1] - math.sin(math.radians(car.angle - 90)) * i)
+                if (track_mask.get_at([x,y])==1):
+                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                    print('Sensor 3: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    break
 
-            pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-            pygame.draw.lines(self.screen, (255, 0, 0), True, [pygame_position, [x1, y1]])
-            pygame.draw.lines(self.screen, (255, 0, 0), True, [pygame_position, [x2, y2]])
+            for i in range(1500):
+                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle + 45)) * i)
+                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle + 45)) * i)
+                if (track_mask.get_at([x,y])==1):
+                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                    print('Sensor 4: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    break
 
+            for i in range(1500):
+                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle - 45)) * i)
+                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle - 45)) * i)
+                if (track_mask.get_at([x,y])==1):
+                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                    print('Sensor 5: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    break
 
             self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
 
             pygame.display.flip()
 
-            print(pygame_position)
-            print(pygame_position + abs(math.cos(math.degrees(abs(car.angle)))) * 100)
-            print("Car steering:", car.steering)
-            print("Car Angle:", car.angle)
+            # print(pygame_position)
+            # print(pygame_position + abs(math.cos(math.degrees(abs(car.angle)))) * 100)
+            # print("Car steering:", car.steering)
+            # print("Car Angle:", car.angle)
 
             self.clock.tick(self.ticks)
         pygame.quit()
