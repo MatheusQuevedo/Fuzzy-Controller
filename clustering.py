@@ -23,9 +23,47 @@ test data to work with.
 from __future__ import division, print_function
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import skfuzzy as fuzz
+import skfuzzy as fuzz
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 colors = ['b', 'orange', 'g', 'r', 'c', 'm', 'y', 'k', 'Brown', 'ForestGreen']
+
+dataset_sensores = pd.read_csv('dataSensores.csv')
+dataset_sensores = dataset_sensores.transpose()
+sensor1 = dataset_sensores.drop(dataset_sensores.index[[1,2,3,4]])
+sensor2 = dataset_sensores.drop(dataset_sensores.index[[0,2,3,4]])
+sensor3 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
+sensor4 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
+sensor5 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,3]])
+
+
+
+
+dataset_sensores
+
+dataset_keys
+dataset_keys = pd.read_csv('dataKeys.csv')
+dataset_keys = dataset_keys.transpose()
+dataset_speed = pd.read_csv('dataVelocidade.csv')
+dataset_speed = dataset_speed.transpose()
+dataset = dataset_sensores
+dataset = dataset.append(dataset_keys)
+dataset = dataset.append(dataset_speed)
+dataset=dataset.transpose()
+
+scaler = MinMaxScaler()
+scaler.fit(dataset)
+dataset = scaler.transform(dataset)
+dataset
+dataset.describe()
+#X = dataset.tolist()
+X
+
+
+X = dataset.values.tolist()
+
+
 
 # Define three cluster centers
 centers = [[4, 2],
@@ -145,16 +183,76 @@ cluster to which each new data point belongs.
 # Regenerate fuzzy model with 3 cluster centers - note that center ordering
 # is random in this clustering algorithm, so the centers may change places
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
-    alldata, 3, 2, error=0.005, maxiter=1000)
+    sensor1, 3, 2, error=0.005, maxiter=1000)
+
+sensor1=np.array(sensor1)
+
 
 # Show 3-cluster model
 fig2, ax2 = plt.subplots()
-ax2.set_title('Trained model')
+ax2.set_title('Trained model for sensor 1')
 for j in range(3):
-    ax2.plot(alldata[0, u_orig.argmax(axis=0) == j],
-             alldata[1, u_orig.argmax(axis=0) == j], 'o',
+    ax2.plot(sensor1[0, u.argmax(axis=0) == j],'o',
              label='series ' + str(j))
 ax2.legend()
+
+cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
+    sensor2, 3, 2, error=0.005, maxiter=1000)
+
+sensor2=np.array(sensor2)
+
+# Show 3-cluster model
+fig2, ax2 = plt.subplots()
+ax2.set_title('Trained model for sensor 2')
+for j in range(3):
+    ax2.plot(sensor2[0, u.argmax(axis=0) == j],'o',
+             label='series ' + str(j))
+ax2.legend()
+
+
+cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
+    sensor3, 3, 2, error=0.005, maxiter=1000)
+
+sensor3=np.array(sensor3)
+
+# Show 3-cluster model
+fig2, ax2 = plt.subplots()
+ax2.set_title('Trained model for sensor 3')
+for j in range(3):
+    ax2.plot(sensor3[0, u.argmax(axis=0) == j],'o',
+             label='series ' + str(j))
+ax2.legend()
+
+
+cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
+    sensor4, 3, 2, error=0.005, maxiter=1000)
+
+sensor4=np.array(sensor4)
+
+# Show 3-cluster model
+fig2, ax2 = plt.subplots()
+ax2.set_title('Trained model for sensor 4')
+for j in range(3):
+    ax2.plot(sensor4[0, u.argmax(axis=0) == j],'o',
+             label='series ' + str(j))
+ax2.legend()
+
+
+cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
+    sensor5, 3, 2, error=0.005, maxiter=1000)
+
+sensor5=np.array(sensor5)
+
+# Show 3-cluster model
+fig2, ax2 = plt.subplots()
+ax2.set_title('Trained model for sensor 5')
+for j in range(3):
+    ax2.plot(sensor5[0, u.argmax(axis=0) == j],'o',
+             label='series ' + str(j))
+ax2.legend()
+
+
+
 
 """
 .. image:: PLOT2RST.current_figure
