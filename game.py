@@ -36,7 +36,7 @@ def crash():
     pygame.quit()
 
 class Car:
-    def __init__(self, x, y, angle=0.0, length=1, max_steering=90, max_acceleration=1.0):
+    def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=1.0):
         self.position = Vector2(x, y)
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
@@ -84,8 +84,8 @@ class Game:
         car = Car(20, 2.3)
         ppu = 32
         #data = np.array([])
-        dataSensors = np.zeros(5)
-        dataKeys = np.zeros(4)
+        dataSensors = np.zeros(3)
+        dataSteering = np.zeros(1)
         dataVel = np.zeros(1)
 
         while not self.exit:
@@ -96,8 +96,8 @@ class Game:
                 if event.type == pygame.QUIT:
                     df = pd.DataFrame(dataSensors)
                     df.to_csv(r'dataSensores.csv', header = None, index=False)
-                    df2 = pd.DataFrame(dataKeys)
-                    df2.to_csv(r'dataKeys.csv', header = None, index=False)
+                    df2 = pd.DataFrame(dataSteering)
+                    df2.to_csv(r'dataSteering.csv', header = None, index=False)
                     df3 = pd.DataFrame(dataVel)
                     df3.to_csv(r'dataVelocidade.csv', header = None, index=False)
                     self.exit = True
@@ -105,15 +105,15 @@ class Game:
             # User input
             pressed = pygame.key.get_pressed()
 
-            b = np.zeros(4)
+            #b = np.zeros(4)
             if pressed[pygame.K_UP]:
-                b[0] = 1
+                #b[0] = 1
                 if car.velocity.x < 0:
                     car.acceleration = car.brake_deceleration
                 else:
                     car.acceleration += 1 * dt
             elif pressed[pygame.K_DOWN]:
-                b[1] = 1
+                #b[1] = 1
                 if car.velocity.x > 0:
                     car.acceleration = -car.brake_deceleration
                 else:
@@ -132,17 +132,19 @@ class Game:
             car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
 
             if pressed[pygame.K_RIGHT]:
-                b[2] = 1
+                #b[2] = 1
                 car.steering -= 30 * dt
             elif pressed[pygame.K_LEFT]:
-                b[3] = 1
+                #b[3] = 1
                 car.steering += 30 * dt
             else:
                 car.steering = 0
             car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
 
-            b = np.array(b)
-            dataKeys = np.vstack((dataKeys, b))
+            # b = np.array(b)
+            # dataKeys = np.vstack((dataKeys, b))
+
+            print(car.steering)
 
             # Logic
             car.update(dt)
@@ -162,8 +164,8 @@ class Game:
             if (track_mask.get_at(position)==1):
                 df = pd.DataFrame(dataSensors)
                 df.to_csv(r'dataSensores.csv', header=None, index=False)
-                df2 = pd.DataFrame(dataKeys)
-                df2.to_csv(r'dataKeys.csv', header=None, index=False)
+                df2 = pd.DataFrame(dataSteering)
+                df2.to_csv(r'dataSteering.csv', header=None, index=False)
                 df3 = pd.DataFrame(dataVel)
                 df3.to_csv(r'dataVelocidade.csv', header=None, index=False)
                 crash()
@@ -197,33 +199,36 @@ class Game:
                     a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
                     break
 
-            for i in range(1500):
-                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle + 45)) * i)
-                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle + 45)) * i)
-                if (track_mask.get_at([x,y])==1):
-                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    print('Sensor Diagonal Positiva: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    break
-
-            for i in range(1500):
-                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle - 45)) * i)
-                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle - 45)) * i)
-                if (track_mask.get_at([x,y])==1):
-                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    print('Sensor Diagonal Negativa: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    break
+            # for i in range(1500):
+            #     x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle + 45)) * i)
+            #     y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle + 45)) * i)
+            #     if (track_mask.get_at([x,y])==1):
+            #         pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+            #         print('Sensor Diagonal Positiva: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         break
+            #
+            # for i in range(1500):
+            #     x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle - 45)) * i)
+            #     y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle - 45)) * i)
+            #     if (track_mask.get_at([x,y])==1):
+            #         pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+            #         print('Sensor Diagonal Negativa: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         break
 
             a = np.array(a)
             dataSensors = np.vstack((dataSensors, a))
 
-            self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
-
-            pygame.display.flip()
+            b = np.array(car.steering)
+            dataVel = np.vstack((dataVel, b))
 
             c = np.array(car.velocity[0])
             dataVel = np.vstack((dataVel, c))
+
+            self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
+
+            pygame.display.flip()
 
 
             # print(pygame_position)
