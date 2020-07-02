@@ -27,74 +27,39 @@ import skfuzzy as fuzz
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-colors = ['b', 'orange', 'g', 'r', 'c', 'm', 'y', 'k', 'Brown', 'ForestGreen']
+# colors = ['b', 'orange', 'g', 'r', 'c', 'm', 'y', 'k', 'Brown', 'ForestGreen']
 
 dataset_sensores = pd.read_csv('dataSensores.csv')
-dataset_sensores = dataset_sensores.transpose()
-sensor1 = dataset_sensores.drop(dataset_sensores.index[[1,2,3,4]])
-sensor2 = dataset_sensores.drop(dataset_sensores.index[[0,2,3,4]])
-sensor3 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
-sensor4 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
-sensor5 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,3]])
-
-
-
-
-dataset_sensores
-
-dataset_keys
-dataset_keys = pd.read_csv('dataKeys.csv')
-dataset_keys = dataset_keys.transpose()
-dataset_speed = pd.read_csv('dataVelocidade.csv')
-dataset_speed = dataset_speed.transpose()
-dataset = dataset_sensores
-dataset = dataset.append(dataset_keys)
-dataset = dataset.append(dataset_speed)
-dataset=dataset.transpose()
-
 scaler = MinMaxScaler()
-scaler.fit(dataset)
-dataset = scaler.transform(dataset)
-dataset
-dataset.describe()
+scaler.fit(dataset_sensores)
+dataset_sensores = scaler.transform(dataset_sensores)
+dataset_sensores = dataset_sensores.transpose()
+
+
+
+# sensor2 = dataset_sensores.drop(dataset_sensores.index[[0,2,3,4]])
+# sensor3 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
+# sensor4 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
+# sensor5 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,3]])
+
+# dataset_keys
+# dataset_keys = pd.read_csv('dataKeys.csv')
+# dataset_keys = dataset_keys.transpose()
+# dataset_speed = pd.read_csv('dataVelocidade.csv')
+# dataset_speed = dataset_speed.transpose()
+# dataset = dataset_sensores
+# dataset = dataset.append(dataset_keys)
+# dataset = dataset.append(dataset_speed)
+# dataset=dataset.transpose()
+
+
+
+
+
 #X = dataset.tolist()
 X
 
-
-X = dataset.values.tolist()
-
-
-
-# Define three cluster centers
-centers = [[4, 2],
-           [1, 7],
-           [5, 6]]
-
-# Define three cluster sigmas in x and y, respectively
-sigmas = [[0.8, 0.3],
-          [0.3, 0.5],
-          [1.1, 0.7]]
-
-# Generate test data
-np.random.seed(42)  # Set seed for reproducibility
-xpts = np.zeros(1)
-ypts = np.zeros(1)
-labels = np.zeros(1)
-for i, ((xmu, ymu), (xsigma, ysigma)) in enumerate(zip(centers, sigmas)):
-    xpts = np.hstack((xpts, np.random.standard_normal(200) * xsigma + xmu))
-    ypts = np.hstack((ypts, np.random.standard_normal(200) * ysigma + ymu))
-    labels = np.hstack((labels, np.ones(200) * i))
-
-# Visualize the test data
-fig0, ax0 = plt.subplots()
-for label in range(3):
-    ax0.plot(xpts[labels == label], ypts[labels == label], '.',
-             color=colors[label])
-ax0.set_title('Test data: 200 points x3 clusters.')
-
 """
-.. image:: PLOT2RST.current_figure
-
 Clustering
 ----------
 
@@ -182,20 +147,33 @@ cluster to which each new data point belongs.
 """
 # Regenerate fuzzy model with 3 cluster centers - note that center ordering
 # is random in this clustering algorithm, so the centers may change places
-cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
-    sensor1, 3, 2, error=0.005, maxiter=1000)
+# c = []
+# count = 0
+# for i in range(2,20):
+#     cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(sensor_frente_esquerda, i, 2, error=0.005, maxiter=1000)
+#     c.append(fpc)
+#     #count = i
+#
+# plt.plot(range(2,20), c)
+#
+# count
+# c
 
-sensor1=np.array(sensor1)
+cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(dataset_sensores, 3, 2, error=0.005, maxiter=1000)
 
+u.argmax(axis=1)
+u.argmax(axis=0)
 
 # Show 3-cluster model
 fig2, ax2 = plt.subplots()
 ax2.set_title('Trained model for sensor 1')
 for j in range(3):
-    ax2.plot(sensor1[0, u.argmax(axis=0) == j],'o',
+    ax2.plot(dataset_sensores[0, u.argmax(axis=0) == j],'o',
              label='series ' + str(j))
 ax2.legend()
 
+
+"""
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     sensor2, 3, 2, error=0.005, maxiter=1000)
 
@@ -251,7 +229,7 @@ for j in range(3):
              label='series ' + str(j))
 ax2.legend()
 
-
+"""
 
 
 """
