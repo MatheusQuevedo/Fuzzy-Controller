@@ -36,7 +36,7 @@ def crash():
     pygame.quit()
 
 class Car:
-    def __init__(self, x, y, angle=0.0, length=1, max_steering=90, max_acceleration=1.0):
+    def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=1.0):
         self.position = Vector2(x, y)
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
@@ -84,7 +84,7 @@ class Game:
         car = Car(20, 2.3)
         ppu = 32
         #data = np.array([])
-        dataSensors = np.zeros(5)
+        dataSensors = np.zeros(3)
         dataKeys = np.zeros(4)
         dataVel = np.zeros(1)
 
@@ -197,23 +197,23 @@ class Game:
                     a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
                     break
 
-            for i in range(1500):
-                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle + 45)) * i)
-                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle + 45)) * i)
-                if (track_mask.get_at([x,y])==1):
-                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    print('Sensor Diagonal Positiva: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    break
-
-            for i in range(1500):
-                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle - 45)) * i)
-                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle - 45)) * i)
-                if (track_mask.get_at([x,y])==1):
-                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    print('Sensor Diagonal Negativa: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    break
+            # for i in range(1500):
+            #     x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle + 45)) * i)
+            #     y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle + 45)) * i)
+            #     if (track_mask.get_at([x,y])==1):
+            #         pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+            #         print('Sensor Diagonal Positiva: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         break
+            #
+            # for i in range(1500):
+            #     x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle - 45)) * i)
+            #     y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle - 45)) * i)
+            #     if (track_mask.get_at([x,y])==1):
+            #         pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+            #         print('Sensor Diagonal Negativa: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
+            #         break
 
             a = np.array(a)
             dataSensors = np.vstack((dataSensors, a))
@@ -224,7 +224,6 @@ class Game:
 
             c = np.array(car.velocity[0])
             dataVel = np.vstack((dataVel, c))
-
 
             # print(pygame_position)
             # print(pygame_position + abs(math.cos(math.degrees(abs(car.angle)))) * 100)
