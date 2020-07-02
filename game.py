@@ -146,6 +146,9 @@ class Game:
 
             print(car.steering)
 
+            b = np.array(car.steering)
+            dataSteering = np.vstack((dataSteering, b))
+
             # Logic
             car.update(dt)
 
@@ -219,9 +222,6 @@ class Game:
 
             a = np.array(a)
             dataSensors = np.vstack((dataSensors, a))
-
-            b = np.array(car.steering)
-            dataVel = np.vstack((dataVel, b))
 
             c = np.array(car.velocity[0])
             dataVel = np.vstack((dataVel, c))
