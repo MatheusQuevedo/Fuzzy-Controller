@@ -36,7 +36,6 @@ dataset_sensores = scaler.transform(dataset_sensores)
 dataset_sensores = dataset_sensores.transpose()
 
 
-
 # sensor2 = dataset_sensores.drop(dataset_sensores.index[[0,2,3,4]])
 # sensor3 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
 # sensor4 = dataset_sensores.drop(dataset_sensores.index[[0,1,2,4]])
@@ -51,6 +50,11 @@ dataset_sensores = dataset_sensores.transpose()
 # dataset = dataset.append(dataset_keys)
 # dataset = dataset.append(dataset_speed)
 # dataset=dataset.transpose()
+
+
+
+
+
 
 
 
@@ -147,15 +151,15 @@ cluster to which each new data point belongs.
 """
 # Regenerate fuzzy model with 3 cluster centers - note that center ordering
 # is random in this clustering algorithm, so the centers may change places
-# c = []
-# count = 0
-# for i in range(2,20):
-#     cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(sensor_frente_esquerda, i, 2, error=0.005, maxiter=1000)
-#     c.append(fpc)
-#     #count = i
-#
-# plt.plot(range(2,20), c)
-#
+c = []
+count = 0
+for i in range(2,20):
+    cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(dataset_sensores, i, 2, error=0.005, maxiter=1000)
+    c.append(fpc)
+
+
+plt.plot(range(2,20), c)
+
 # count
 # c
 
@@ -168,7 +172,8 @@ u.argmax(axis=0)
 fig2, ax2 = plt.subplots()
 ax2.set_title('Trained model for sensor 1')
 for j in range(3):
-    ax2.plot(dataset_sensores[0, u.argmax(axis=0) == j],'o',
+    ax2.plot(dataset_sensores[0, u.argmax(axis=0) == j],
+             dataset_sensores[1, u.argmax(axis=0) == j], 'o',
              label='series ' + str(j))
 ax2.legend()
 
