@@ -87,6 +87,7 @@ class Game:
         dataSensors = np.zeros(3)
         dataSteering = np.zeros(1)
         dataVel = np.zeros(1)
+        steer=0
 
         while not self.exit:
             dt = self.clock.get_time() / 1000
@@ -130,16 +131,27 @@ class Game:
                     if dt != 0:
                         car.acceleration = -car.velocity.x / dt
             car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
-
             if pressed[pygame.K_RIGHT]:
                 #b[2] = 1
                 car.steering -= 30 * dt
+                steer = car.steering
             elif pressed[pygame.K_LEFT]:
                 #b[3] = 1
                 car.steering += 30 * dt
+                steer = car.steering
             else:
                 car.steering = 0
+
+                if steer > 0:
+                    steer -= 30 * dt
+                elif steer < 0:
+                    steer += 30 * dt
+                else:
+                    steer = 0
+
+
             car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
+            steer = max(-car.max_steering, min(steer, car.max_steering))
 
             # b = np.array(b)
             # dataKeys = np.vstack((dataKeys, b))
@@ -180,7 +192,7 @@ class Game:
                 y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle)) * i)
                 if (track_mask.get_at([x,y])==1):
                     pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    print('Sensor Reto: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    #print('Sensor Reto: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
                     a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
                     break
 
@@ -189,7 +201,7 @@ class Game:
                  y = np.int(pygame_position[1] - math.sin(math.radians(car.angle+90)) * i)
                  if (track_mask.get_at([x,y])==1):
                      pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                     print('Sensor Esquerda: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                     #print('Sensor Esquerda: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
                      a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
                      break
 
@@ -198,7 +210,7 @@ class Game:
                 y = np.int(pygame_position[1] - math.sin(math.radians(car.angle - 90)) * i)
                 if (track_mask.get_at([x,y])==1):
                     pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    print('Sensor Direita: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
+                    #print('Sensor Direita: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
                     a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
                     break
 
