@@ -224,7 +224,7 @@ velocidade = ctrl.Consequent(np.arange(0, 3, 0.1), 'Velocidade')
 # Custom membership functions can be built interactively with a familiar,
 # Funções de pertinência para os sensores laterais
 posicao_lateral['Esquerda'] = fuzz.trapmf(posicao_lateral.universe, [-610, -600, -13.2, -5])
-posicao_lateral['Meio'] = fuzz.trimf(posicao_lateral.universe, [-10 , -3.8, 1.5])
+posicao_lateral['Meio'] = fuzz.trimf(posicao_lateral.universe, [-10 , -3.8, 2])
 posicao_lateral['Direita'] = fuzz.trapmf(posicao_lateral.universe, [1, 1.2, 500, 510])
 # Funções de pertinência para o sensor frontal
 posicao_frontal['Perto'] = fuzz.trapmf(posicao_frontal.universe, [-1, 0, 402, 600])
