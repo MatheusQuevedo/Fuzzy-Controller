@@ -36,16 +36,16 @@ def crash():
     pygame.quit()
 
 class Car:
-    def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=1.0):
+    def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=10.0):
         self.position = Vector2(x, y)
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
         self.length = length
         self.max_acceleration = max_acceleration
         self.max_steering = max_steering
-        self.max_velocity = 3
+        self.max_velocity = 8
         self.brake_deceleration = 20
-        self.free_deceleration = 50
+        self.free_deceleration = 5
         self.acceleration = 0.0
         self.steering = 0.0
 
@@ -78,10 +78,10 @@ class Game:
     def run(self):
         car_image = pygame.image.load('car.png')
         car_image = pygame.transform.scale(car_image, (45, 20))
-        track_image = pygame.image.load('track_image.png')
+        track_image = pygame.image.load('race_track.png')
         track_image = pygame.transform.scale(track_image, (1280, 720))
         track_mask = pygame.mask.from_threshold(track_image,pygame.Color('black'), (1, 1, 1, 255))
-        car = Car(20, 2.3)
+        car = Car(10, 20)
         ppu = 32
         #data = np.array([])
         dataSensors = np.zeros(3)
@@ -101,7 +101,7 @@ class Game:
                     # df2.to_csv(r'dataSteering.csv', header = None, index=False)
                     # df3 = pd.DataFrame(dataVel)
                     # df3.to_csv(r'dataVelocidade.csv', header = None, index=False)
-                    # self.exit = True
+                    self.exit = True
 
             # User input
             pressed = pygame.key.get_pressed()
