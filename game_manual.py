@@ -95,13 +95,13 @@ class Game:
             # Event queue
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    df = pd.DataFrame(dataSensors)
-                    df.to_csv(r'dataSensores.csv', header = None, index=False)
-                    df2 = pd.DataFrame(dataSteering)
-                    df2.to_csv(r'dataSteering.csv', header = None, index=False)
-                    df3 = pd.DataFrame(dataVel)
-                    df3.to_csv(r'dataVelocidade.csv', header = None, index=False)
-                    self.exit = True
+                    # df = pd.DataFrame(dataSensors)
+                    # df.to_csv(r'dataSensores.csv', header = None, index=False)
+                    # df2 = pd.DataFrame(dataSteering)
+                    # df2.to_csv(r'dataSteering.csv', header = None, index=False)
+                    # df3 = pd.DataFrame(dataVel)
+                    # df3.to_csv(r'dataVelocidade.csv', header = None, index=False)
+                    # self.exit = True
 
             # User input
             pressed = pygame.key.get_pressed()
@@ -177,12 +177,12 @@ class Game:
 
             #se for uma posição da máscara, ele colide
             if (track_mask.get_at(position)==1):
-                df = pd.DataFrame(dataSensors)
-                df.to_csv(r'dataSensores.csv', header=None, index=False)
-                df2 = pd.DataFrame(dataSteering)
-                df2.to_csv(r'dataSteering.csv', header=None, index=False)
-                df3 = pd.DataFrame(dataVel)
-                df3.to_csv(r'dataVelocidade.csv', header=None, index=False)
+                # df = pd.DataFrame(dataSensors)
+                # df.to_csv(r'dataSensores.csv', header=None, index=False)
+                # df2 = pd.DataFrame(dataSteering)
+                # df2.to_csv(r'dataSteering.csv', header=None, index=False)
+                # df3 = pd.DataFrame(dataVel)
+                # df3.to_csv(r'dataVelocidade.csv', header=None, index=False)
                 crash()
 
             a = []
