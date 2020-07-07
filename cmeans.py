@@ -57,9 +57,9 @@ df = pd.read_csv('dataSensores.csv')
 res = df.to_numpy()
 
 frontal = res[:,0]
+min(frontal)
 
-
-
+min(vel)
 print(vel.shape)
 print(frontal.shape)
 alldata_frontal_vel = np.vstack((frontal, vel))
@@ -136,7 +136,7 @@ plt.show()
 
 #como resgatar os valores originais
 cntr.shape
-bleuris.shape
+
 
 bleuris=cntr.transpose()
 scaler.inverse_transform(cntr)
@@ -172,6 +172,15 @@ plt.show()
 bleuris=cntr_frontal_vel.transpose()
 scaler_frontal_vel.inverse_transform(bleuris)
 
+alldata_frontal_vel[0][0]
+alldata_frontal_vel[1][0]
+bla=[]
+ble=[]
+
+
+u, u0, d, jm, p, fpc = fuzz.cluster.cmeans_predict(np.array([[alldata_frontal_vel[0][i]],[alldata_frontal_vel[1][i]]]), cntr_frontal_vel, 2, error=0.005, maxiter=1000)
+
+
 """
 cmeans para relacionar os sensores frontal e laterais com o ângulo do volante
 """
@@ -206,7 +215,7 @@ cntr_frontlat_ang.shape
 scaler_frontlat_ang.inverse_transform(cntr_frontlat_ang)
 
 
-u, u0, d, jm, p, fpc = fuzz.cluster.cmeans_predict(np.array([[0.53437889],[0.412]]), cntr, 2, error=0.005, maxiter=1000)
+u, u0, d, jm, p, fpc = fuzz.cluster.cmeans_predict(np.array([[0.53437889],[0.412]]), cntr_frontal_vel, 2, error=0.005, maxiter=1000)
 u
 
 
@@ -216,26 +225,26 @@ teste de controlador fuzzy
 """
 # New Antecedent/Consequent objects hold universe variables and membership
 # functions
-posicao_lateral = ctrl.Antecedent(np.arange(-600, 500, 0.1), 'Posicao Lateral')
-posicao_frontal = ctrl.Antecedent(np.arange(0, 800, 0.1), 'Posicao Frontal')
+posicao_lateral = ctrl.Antecedent(np.arange(-90, 650, 0.1), 'Posicao Lateral')
+posicao_frontal = ctrl.Antecedent(np.arange(65, 1120, 0.1), 'Posicao Frontal')
 angulo_volante = ctrl.Consequent(np.arange(-30, 30, 0.1), 'Angulo Volante')
-velocidade = ctrl.Consequent(np.arange(0, 3, 0.1), 'Velocidade')
+velocidade = ctrl.Consequent(np.arange(-1, 8, 0.1), 'Velocidade')
 
 # Custom membership functions can be built interactively with a familiar,
 # Funções de pertinência para os sensores laterais
-posicao_lateral['Esquerda'] = fuzz.trapmf(posicao_lateral.universe, [-610, -600, -13.2, -5])
-posicao_lateral['Meio'] = fuzz.trimf(posicao_lateral.universe, [-10 , -3.8, 2])
-posicao_lateral['Direita'] = fuzz.trapmf(posicao_lateral.universe, [1, 1.2, 500, 510])
+posicao_lateral['Esquerda'] = fuzz.trapmf(posicao_lateral.universe, [-100, -90, 6, 7])
+posicao_lateral['Meio'] = fuzz.trimf(posicao_lateral.universe, [3 , 7, 10])
+posicao_lateral['Direita'] = fuzz.trapmf(posicao_lateral.universe, [8, 24, 700, 700])
 # Funções de pertinência para o sensor frontal
-posicao_frontal['Perto'] = fuzz.trapmf(posicao_frontal.universe, [-1, 0, 402, 600])
-posicao_frontal['Longe'] = fuzz.trapmf(posicao_frontal.universe, [450, 704, 800, 810])
+posicao_frontal['Perto'] = fuzz.trapmf(posicao_frontal.universe, [-1, 0, 431, 600])
+posicao_frontal['Longe'] = fuzz.trapmf(posicao_frontal.universe, [450, 1056,1121,1130])
 # Funções de pertinência para os sensores laterais
-angulo_volante['Esquerda'] = fuzz.trapmf(angulo_volante.universe, [-33, -30, -25,-9])
-angulo_volante['Meio'] = fuzz.trimf(angulo_volante.universe, [-10, -0.9, 10])
-angulo_volante['Direita'] = fuzz.trapmf(angulo_volante.universe, [9, 25, 30, 35])
+angulo_volante['Esquerda'] = fuzz.trapmf(angulo_volante.universe, [-33, -30, 0,1])
+angulo_volante['Meio'] = fuzz.trimf(angulo_volante.universe, [-2, 11, 15])
+angulo_volante['Direita'] = fuzz.trapmf(angulo_volante.universe, [10, 26, 30, 35])
 # Funções de pertinência para o sensor frontal
-velocidade['Devagar'] = fuzz.trapmf(velocidade.universe, [-1, 0, 0.4, 1.5])
-velocidade['Rapido'] = fuzz.trapmf(velocidade.universe, [1, 2.9, 3, 3.5])
+velocidade['Devagar'] = fuzz.trapmf(velocidade.universe, [-2, -1, 2, 4])
+velocidade['Rapido'] = fuzz.trapmf(velocidade.universe, [1, 3, 8, 9])
 # You can see how these look with .view()
 posicao_frontal['Longe'].view()
 velocidade['Devagar'].view()
@@ -253,10 +262,13 @@ rule4 = ctrl.Rule(posicao_lateral['Esquerda'] & posicao_frontal['Longe'], angulo
 rule4_2 = ctrl.Rule(posicao_lateral['Esquerda'] & posicao_frontal['Longe'], velocidade['Rapido'])
 rule5 = ctrl.Rule(posicao_lateral['Direita'] & posicao_frontal['Longe'], angulo_volante['Esquerda'])
 rule5_2 = ctrl.Rule(posicao_lateral['Direita'] & posicao_frontal['Longe'], velocidade['Rapido'])
+rule6 = ctrl.Rule(posicao_lateral['Meio'] & posicao_frontal['Perto'], angulo_volante['Direita'])
+rule6_2 = ctrl.Rule(posicao_lateral['Meio'] & posicao_frontal['Perto'], velocidade['Devagar'])
+
 rule1.view()
 
 
-car_ctrl = ctrl.ControlSystem([rule1, rule1_2, rule2, rule2_2, rule3, rule3_2, rule4, rule4_2, rule5, rule5_2])
+car_ctrl = ctrl.ControlSystem([rule1, rule1_2, rule2, rule2_2, rule3, rule3_2, rule4, rule4_2, rule5, rule5_2, rule6, rule6_2])
 carro = ctrl.ControlSystemSimulation(car_ctrl)
 carro.input['Posicao Lateral'] = 30
 carro.input['Posicao Frontal'] = 400
