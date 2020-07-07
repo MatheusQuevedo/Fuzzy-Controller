@@ -35,6 +35,49 @@ def crash():
     time.sleep(2)
     pygame.quit()
 
+
+class PID:
+    """PID controller."""
+
+    def __init__(self, Kp, Ki, Kd, origin_time=None):
+        if origin_time is None:
+            origin_time = time.time()
+
+        # Gains for each term
+        self.Kp = Kp
+        self.Ki = Ki
+        self.Kd = Kd
+
+        # Corrections (outputs)
+        self.Cp = 0.0
+        self.Ci = 0.0
+        self.Cd = 0.0
+
+        self.previous_time = origin_time
+        self.previous_error = 0.0
+
+    def Update(self, error, current_time=None):
+        if current_time is None:
+            current_time = time.time()
+        dt = current_time - self.previous_time
+        if dt <= 0.0:
+            return 0
+        de = error - self.previous_error
+
+        self.Cp = error
+        self.Ci += error * dt
+        self.Cd = de / dt
+
+        self.previous_time = current_time
+        self.previous_error = error
+
+        return (
+            (self.Kp * self.Cp)    # proportional term
+            + (self.Ki * self.Ci)  # integral term
+            + (self.Kd * self.Cd)  # derivative term
+        )
+
+
 class Car:
     def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=1.0):
         self.position = Vector2(x, y)
@@ -66,7 +109,7 @@ class Car:
 class Game:
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("Car tutorial")
+        pygame.display.set_caption("Simulador Fuzzy")
         width = 1280
         height = 720
         self.screen = pygame.display.set_mode((width, height))
@@ -75,94 +118,139 @@ class Game:
         self.exit = False
 
 
+
     def run(self):
         car_image = pygame.image.load('car.png')
         car_image = pygame.transform.scale(car_image, (45, 20))
-        track_image = pygame.image.load('track_image.png')
+        track_image = pygame.image.load('race_track.png')
         track_image = pygame.transform.scale(track_image, (1280, 720))
         track_mask = pygame.mask.from_threshold(track_image,pygame.Color('black'), (1, 1, 1, 255))
-        car = Car(20, 2.3)
+        car = Car(30, 1.5)
         ppu = 32
         #data = np.array([])
         dataSensors = np.zeros(3)
         dataSteering = np.zeros(1)
         dataVel = np.zeros(1)
         steer=0
+        sensor_esquerdo = 0
+        sensor_direito = 0
+        sensor_frontal = 0
+        distancia = 0
+        controlador_lateral = PID(1, 0, 0.1)
+        target_distance = 0
+
+
 
         while not self.exit:
             dt = self.clock.get_time() / 1000
 
+
             # Event queue
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    # df = pd.DataFrame(dataSensors)
-                    # df.to_csv(r'dataSensores.csv', header = None, index=False)
-                    # df2 = pd.DataFrame(dataSteering)
-                    # df2.to_csv(r'dataSteering.csv', header = None, index=False)
-                    # df3 = pd.DataFrame(dataVel)
-                    # df3.to_csv(r'dataVelocidade.csv', header = None, index=False)
                     self.exit = True
 
-            # User input
             pressed = pygame.key.get_pressed()
-
-            #b = np.zeros(4)
             if pressed[pygame.K_UP]:
-                #b[0] = 1
-                if car.velocity.x < 0:
-                    car.acceleration = car.brake_deceleration
-                else:
-                    car.acceleration += 1 * dt
-            elif pressed[pygame.K_DOWN]:
-                #b[1] = 1
-                if car.velocity.x > 0:
-                    car.acceleration = -car.brake_deceleration
-                else:
-                    car.acceleration -= 1 * dt
-            elif pressed[pygame.K_SPACE]:
-                if abs(car.velocity.x) > dt * car.brake_deceleration:
-                    car.acceleration = -copysign(car.brake_deceleration, car.velocity.x)
-                else:
-                    car.acceleration = -car.velocity.x / dt
-            else:
-                if abs(car.velocity.x) > dt * car.free_deceleration:
-                    car.acceleration = -copysign(car.free_deceleration, car.velocity.x)
-                else:
-                    if dt != 0:
-                        car.acceleration = -car.velocity.x / dt
-            car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
-            if pressed[pygame.K_RIGHT]:
-                #b[2] = 1
-                car.steering -= 30 * dt
-                steer = car.steering
-            elif pressed[pygame.K_LEFT]:
-                #b[3] = 1
-                car.steering += 30 * dt
-                steer = car.steering
-            else:
-                car.steering = 0
+                pygame_position = np.round(car.position * ppu)
+                #sensores
+                for i in range(1500):
+                    x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle)) * i)
+                    y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle)) * i)
+                    if (track_mask.get_at([x,y])==1):
+                        pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                        sensor_frontal = math.hypot(x - pygame_position[0], y - pygame_position[1])
+                        break
 
-                if steer > 0:
-                    steer -= 30 * dt
-                elif steer < 0:
-                    steer += 30 * dt
-                else:
-                    steer = 0
+                for i in range(1500):
+                     x = np.int(pygame_position[0] + math.cos(math.radians(car.angle+90)) * i)
+                     y = np.int(pygame_position[1] - math.sin(math.radians(car.angle+90)) * i)
+                     if (track_mask.get_at([x,y])==1):
+                         pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                         sensor_esquerdo = math.hypot(x - pygame_position[0], y - pygame_position[1])
+                         break
 
+                for i in range(1500):
+                    x = np.int(pygame_position[0] + math.cos(math.radians(car.angle - 90)) * i)
+                    y = np.int(pygame_position[1] - math.sin(math.radians(car.angle - 90)) * i)
+                    if (track_mask.get_at([x,y])==1):
+                        pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
+                        sensor_direito = math.hypot(x - pygame_position[0], y - pygame_position[1])
+                        break
 
-            car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
-            steer = max(-car.max_steering, min(steer, car.max_steering))
+                distancia = sensor_direito - sensor_esquerdo
+                error = target_distance - distancia
 
-            # b = np.array(b)
-            # dataKeys = np.vstack((dataKeys, b))
+                correction = controlador_lateral.Update(error)
+                print(correction)
+                print(distancia)
+                car.steering = correction
 
-            print(car.steering)
+                car.velocity.x = 3
+                car.acceleration = -car.velocity.x / dt
+                car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
+                car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
+                #
+                # # User input
+                # pressed = pygame.key.get_pressed()
+                #
+                # #b = np.zeros(4)
+                # if pressed[pygame.K_UP]:
+                #     #b[0] = 1
+                #     if car.velocity.x < 0:
+                #         car.acceleration = car.brake_deceleration
+                #     else:
+                #         car.acceleration += 1 * dt
+                # elif pressed[pygame.K_DOWN]:
+                #     #b[1] = 1
+                #     if car.velocity.x > 0:
+                #         car.acceleration = -car.brake_deceleration
+                #     else:
+                #         car.acceleration -= 1 * dt
+                # elif pressed[pygame.K_SPACE]:
+                #     if abs(car.velocity.x) > dt * car.brake_deceleration:
+                #         car.acceleration = -copysign(car.brake_deceleration, car.velocity.x)
+                #     else:
+                #         car.acceleration = -car.velocity.x / dt
+                # else:
+                #     if abs(car.velocity.x) > dt * car.free_deceleration:
+                #         car.acceleration = -copysign(car.free_deceleration, car.velocity.x)
+                #     else:
+                #         if dt != 0:
+                #             car.acceleration = -car.velocity.x / dt
+                # car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
+                # if pressed[pygame.K_RIGHT]:
+                #     #b[2] = 1
+                #     car.steering -= 30 * dt
+                #     steer = car.steering
+                # elif pressed[pygame.K_LEFT]:
+                #     #b[3] = 1
+                #     car.steering += 30 * dt
+                #     steer = car.steering
+                # else:
+                #     car.steering = 0
+                #
+                #     if steer > 0:
+                #         steer -= 30 * dt
+                #     elif steer < 0:
+                #         steer += 30 * dt
+                #     else:
+                #         steer = 0
+                #
+                #
+                # car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
+                # steer = max(-car.max_steering, min(steer, car.max_steering))
+                #
+                # # b = np.array(b)
+                # # dataKeys = np.vstack((dataKeys, b))
+                #
+                # print(car.velocity)
+                #
+                # b = np.array(car.steering)
+                # dataSteering = np.vstack((dataSteering, b))
 
-            b = np.array(car.steering)
-            dataSteering = np.vstack((dataSteering, b))
-
-            # Logic
-            car.update(dt)
+                # Logic
+                car.update(dt)
 
             # Drawing
             self.screen.blit(track_image, [0, 0])
@@ -185,35 +273,6 @@ class Game:
                 # df3.to_csv(r'dataVelocidade.csv', header=None, index=False)
                 crash()
 
-            a = []
-            #sensores
-            for i in range(1500):
-                x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle)) * i)
-                y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle)) * i)
-                if (track_mask.get_at([x,y])==1):
-                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    #print('Sensor Reto: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    break
-
-            for i in range(1500):
-                 x = np.int(pygame_position[0] + math.cos(math.radians(car.angle+90)) * i)
-                 y = np.int(pygame_position[1] - math.sin(math.radians(car.angle+90)) * i)
-                 if (track_mask.get_at([x,y])==1):
-                     pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                     #print('Sensor Esquerda: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                     a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                     break
-
-            for i in range(1500):
-                x = np.int(pygame_position[0] + math.cos(math.radians(car.angle - 90)) * i)
-                y = np.int(pygame_position[1] - math.sin(math.radians(car.angle - 90)) * i)
-                if (track_mask.get_at([x,y])==1):
-                    pygame.draw.lines(self.screen,(255,0,0),True,[pygame_position, [x,y]])
-                    #print('Sensor Direita: ', math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
-                    break
-
             # for i in range(1500):
             #     x =  np.int(pygame_position[0] + math.cos(math.radians(car.angle + 45)) * i)
             #     y =  np.int(pygame_position[1] - math.sin(math.radians(car.angle + 45)) * i)
@@ -232,8 +291,7 @@ class Game:
             #         a.append(math.hypot(x - pygame_position[0], y - pygame_position[1]))
             #         break
 
-            a = np.array(a)
-            dataSensors = np.vstack((dataSensors, a))
+
 
             c = np.array(car.velocity[0])
             dataVel = np.vstack((dataVel, c))
