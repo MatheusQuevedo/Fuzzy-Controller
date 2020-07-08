@@ -36,14 +36,14 @@ def crash():
     pygame.quit()
 
 class Car:
-    def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=10.0):
+    def __init__(self, x, y, angle=0.0, length=1, max_steering=30, max_acceleration=1):
         self.position = Vector2(x, y)
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
         self.length = length
         self.max_acceleration = max_acceleration
         self.max_steering = max_steering
-        self.max_velocity = 8
+        self.max_velocity = 3
         self.brake_deceleration = 20
         self.free_deceleration = 5
         self.acceleration = 0.0
@@ -81,7 +81,7 @@ class Game:
         track_image = pygame.image.load('race_track.png')
         track_image = pygame.transform.scale(track_image, (1280, 720))
         track_mask = pygame.mask.from_threshold(track_image,pygame.Color('black'), (1, 1, 1, 255))
-        car = Car(10, 20)
+        car = Car(30, 1.5)
         ppu = 32
         #data = np.array([])
         dataSensors = np.zeros(3)
@@ -156,7 +156,7 @@ class Game:
             # b = np.array(b)
             # dataKeys = np.vstack((dataKeys, b))
 
-            print(car.steering)
+
 
             b = np.array(car.steering)
             dataSteering = np.vstack((dataSteering, b))
@@ -234,6 +234,8 @@ class Game:
 
             a = np.array(a)
             dataSensors = np.vstack((dataSensors, a))
+
+            print(a[1]-a[2])
 
             c = np.array(car.velocity[0])
             dataVel = np.vstack((dataVel, c))
