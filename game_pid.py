@@ -86,7 +86,7 @@ class Car:
         self.length = length
         self.max_acceleration = max_acceleration
         self.max_steering = max_steering
-        self.max_velocity = 3
+        self.max_velocity = 8
         self.brake_deceleration = 20
         self.free_deceleration = 50
         self.acceleration = 0.0
@@ -138,6 +138,8 @@ class Game:
         distancia = 0
         controlador_lateral = PID(1, 0, 0.1)
         target_distance = 0
+        controlador_frontal = PID(1, 0, 0)
+        distancia_ideal = 10
 
 
 
@@ -180,13 +182,11 @@ class Game:
 
                 distancia = sensor_direito - sensor_esquerdo
                 error = target_distance - distancia
-
+                error_frontal = distancia_ideal - sensor_frontal
                 correction = controlador_lateral.Update(error)
-                print(correction)
-                print(distancia)
+                correction_frontal = controlador_frontal.Update(error_frontal)
                 car.steering = correction
-
-                car.velocity.x = 3
+                car.velocity.x = -correction_frontal
                 car.acceleration = -car.velocity.x / dt
                 car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
                 car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
