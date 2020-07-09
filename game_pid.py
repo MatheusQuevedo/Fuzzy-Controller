@@ -5,6 +5,7 @@ import pygame
 import time
 from math import sin, radians, degrees, copysign
 from pygame.math import Vector2
+import matplotlib.pyplot as plt
 import pandas as pd
 from PIL import Image
 
@@ -140,7 +141,7 @@ class Game:
         target_distance = 0
         controlador_frontal = PID(1, 0, 0)
         distancia_ideal = 10
-
+        ploterror = np.zeros(1)
 
 
         while not self.exit:
@@ -150,8 +151,11 @@ class Game:
             # Event queue
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    plt.plot(range(0, (ploterror.reshape(1, ploterror.size)).size), ploterror)
+                    plt.show()
                     self.exit = True
 
+            a = []
             pressed = pygame.key.get_pressed()
             if pressed[pygame.K_UP]:
                 pygame_position = np.round(car.position * ppu)
@@ -190,6 +194,10 @@ class Game:
                 car.acceleration = -car.velocity.x / dt
                 car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
                 car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
+
+                a.append(error)
+                a = np.array(a)
+                ploterror = np.vstack((ploterror, a))
                 #
                 # # User input
                 # pressed = pygame.key.get_pressed()
@@ -252,6 +260,8 @@ class Game:
                 # Logic
                 car.update(dt)
 
+
+
             # Drawing
             self.screen.blit(track_image, [0, 0])
             rotated = pygame.transform.rotate(car_image, car.angle)
@@ -293,8 +303,7 @@ class Game:
 
 
 
-            c = np.array(car.velocity[0])
-            dataVel = np.vstack((dataVel, c))
+
 
             self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
 

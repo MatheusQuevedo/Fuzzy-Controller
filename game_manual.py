@@ -92,6 +92,8 @@ class Game:
         while not self.exit:
             dt = self.clock.get_time() / 1000
 
+            print("variavel tempo", dt)
+
             # Event queue
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
