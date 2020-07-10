@@ -40,15 +40,14 @@ def crash():
 
 def controle_fuzzy():
 
-    # New Antecedent/Consequent objects hold universe variables and membership
-    # functions
+    # Descrição do conjunto universo para os antecedentes e consequentes
     posicao_lateral = ctrl.Antecedent(np.arange(-90, 90, 0.1), 'Posicao Lateral')
     posicao_derivadaerro = ctrl.Antecedent(np.arange(-3000, 3000, 0.1), 'Derivada Erro')
     posicao_frontal = ctrl.Antecedent(np.arange(30, 1120, 0.1), 'Posicao Frontal')
     angulo_volante = ctrl.Consequent(np.arange(-35, 35, 0.1), 'Angulo Volante')
     velocidade = ctrl.Consequent(np.arange(-1, 8, 0.1), 'Velocidade')
 
-    # Custom membership functions can be built interactively with a familiar,
+    # Funções de pertinência para a derivada do erro
     posicao_derivadaerro['Muito Direita'] = fuzz.trapmf(posicao_derivadaerro.universe, [-3000, -2900, -800, -90])
     posicao_derivadaerro['Direita'] = fuzz.trapmf(posicao_derivadaerro.universe, [-800, -600, -150, 0])
     posicao_derivadaerro['Meio'] = fuzz.trimf(posicao_derivadaerro.universe, [-150, 0, 150])
